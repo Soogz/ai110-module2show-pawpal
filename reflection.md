@@ -6,8 +6,12 @@
 
 - Briefly describe your initial UML design.
 
-    
+     There are 5 main classes outlined in the UML design that form the skeleton of the pet care app. They have relations with each other and one is dependent on the other to generate an output for the application. The five main classes are Pet, Owner, Task, Scheduler, and Daily plan.
+
+
 - What classes did you include, and what responsibilities did you assign to each?
+
+    The initial UML design includes the classes Pet, Task, Owner, Scheduler, and Daily plan. The Tasks class stores information about tasks that need to be done. The Pet class stores information about the pets. The owner class includes data such as best time for getting pet cleaned. The scheduler class generates the Daily Plan class and its the main backbone of the app. The Dailyplan app is generally the output and the vehicle for the data to display to the end user.
 
 **b. Design changes**
 
