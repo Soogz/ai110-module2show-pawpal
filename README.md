@@ -48,6 +48,30 @@ Tasks that exceed the entire daily budget are flagged as individually impossible
 
 ---
 
+## Testing PawPal+
+
+### Running the tests
+
+```bash
+python -m pytest tests/tests_pawpal.py -v
+```
+
+### What the tests cover
+
+**Sorting correctness** — verifies that `sort_by_priority` orders tasks HIGH → MEDIUM → LOW, uses recurrence (DAILY → WEEKLY → NONE) as a tie-breaker, and prefers shorter tasks when priority and recurrence match. Also confirms `generate_plan` returns the final scheduled list in chronological `time_slot` order, with unscheduled tasks trailing timed ones.
+
+**Recurrence logic** — confirms that marking a `DAILY` or `WEEKLY` task complete returns a new, distinct task object with `completed=False` and the same title/duration. Verifies that completing a task twice produces two independent occurrences, and that non-recurring (`NONE`) tasks return `None` on completion.
+
+**Conflict detection** — checks that the scheduler flags overlapping time windows (including two tasks at the exact same slot), does not flag back-to-back tasks, and ignores unscheduled tasks entirely. Includes an end-to-end test that confirms `plan.conflicts` is populated by `generate_plan`, and cross-pet conflict tests for both the overlapping and non-overlapping cases.
+
+### Confidence level
+
+★★★★☆ (4/5)
+
+32 tests pass across all three areas, covering the critical scheduling paths and all identified boundary conditions. The main gap is the UI layer in `app.py` — specifically the duplicate-occurrence guard and checkbox state — which is not covered by unit tests. Integration or end-to-end tests for the Streamlit front-end would be needed to reach full confidence.
+
+---
+
 ## Getting started
 
 ### Setup
