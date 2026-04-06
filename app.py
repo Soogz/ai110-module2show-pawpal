@@ -55,11 +55,11 @@ if st.session_state.pets:
         category = st.selectbox("Category", [c.value for c in Category])
         recurrence = st.selectbox("Recurrence", [r.value for r in Recurrence])
         set_time = st.checkbox("Set specific time slot?")
-        time_input = st.time_input("Time Slot") if set_time else None
+        time_input = st.time_input("Time Slot", disabled=not set_time)
         task_submitted = st.form_submit_button("Add Task")
         if task_submitted:
             if task_title:
-                time_slot = (time_input.hour * 60 + time_input.minute) if time_input else None
+                time_slot = (time_input.hour * 60 + time_input.minute) if set_time else None
                 task = Task(
                     title=task_title,
                     duration_minutes=int(duration),

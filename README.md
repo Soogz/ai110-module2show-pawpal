@@ -22,29 +22,23 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
-## Smarter Scheduling
+## Features
 
-The following features were added to `pawpal_system.py` and `app.py` to make the scheduler more useful for real pet owners.
+- **Greedy task scheduler** — fits tasks into the owner's daily time budget using a greedy algorithm: tasks are evaluated in priority order and added to the plan if they fit in the remaining minutes. Skipping one task never blocks a later, shorter task from being scheduled.
 
-**Priority & time-slot sorting**
-Tasks are sorted by a three-level key — priority (HIGH → LOW), then recurrence (daily before weekly before one-off), then shortest duration. Within the final scheduled list, tasks with an assigned time slot appear first in chronological order; unscheduled tasks follow.
+- **Three-level priority sort** — `sort_by_priority` orders tasks by a composite key: priority tier (HIGH → MEDIUM → LOW), then recurrence type (DAILY → WEEKLY → NONE, so routine care is never bumped by one-off tasks of equal priority), then duration ascending (shortest-first as a bin-packing heuristic to maximize how many tasks fit).
 
-**Age-aware priority boost**
-HEALTH tasks are automatically elevated to HIGH priority for pets under age 2 or over age 8. This ensures vet visits, medications, and wellness checks are never bumped by lower-priority tasks for vulnerable pets.
+- **Chronological schedule output** — after greedy selection, `generate_plan` re-sorts the scheduled list so timed tasks appear in ascending `time_slot` order (minutes from midnight), with unscheduled tasks grouped at the end.
 
-**Recurring tasks**
-Tasks can be marked `daily` or `weekly`. When a recurring task is checked off, a fresh copy is automatically queued for its next occurrence — no need to re-add it manually.
+- **Age-aware priority boost** — `apply_age_boost` scans all tasks before scheduling and shallow-copies any HEALTH task that is not already HIGH priority when the pet's age is outside the 2–8 range (under 2 or over 8). Original task objects are never mutated.
 
-**Conflict detection**
-The scheduler checks for overlapping time windows and reports plain-English warnings rather than crashing. Same-pet conflicts (e.g. two tasks booked at 09:00 for the same pet) and cross-pet conflicts (e.g. a walk for Buddy and a grooming for Luna scheduled at the same time) are both detected and displayed separately.
+- **Recurring task queue** — tasks carry a `Recurrence` field (NONE / DAILY / WEEKLY). Calling `mark_complete()` on a recurring task sets it to completed and returns a shallow copy with `completed=False`, ready to be appended as the next occurrence. Non-recurring tasks return `None`.
 
-**Smarter skipping**
-Tasks that exceed the entire daily budget are flagged as individually impossible and surfaced in the skipped list with a clear reason, rather than silently disappearing.
+- **Impossible-task filtering** — `filter_by_time` separates tasks whose duration alone exceeds the entire daily budget before the greedy loop runs, so they are always reported in the skipped list with a clear reason rather than silently competing for time.
 
-**UI improvements**
-- Filter the schedule view by pet or by completion status (all / incomplete only).
-- Live time-budget summary updates as tasks are added to a pet.
-- Checkbox state persists across schedule regenerations.
+- **Overlap conflict detection** — `detect_conflicts` performs an O(n²) pairwise scan of all timed tasks and flags any pair where the intervals overlap using strict inequality (`a.start < b.end and b.start < a.end`). Back-to-back tasks are intentionally not flagged. Unscheduled tasks (no `time_slot`) are skipped.
+
+- **Cross-pet conflict detection** — `detect_cross_pet_conflicts` (static method) applies the same overlap check across tasks belonging to different pets, useful when one owner manages multiple animals on the same schedule.
 
 ---
 
@@ -73,6 +67,13 @@ python -m pytest tests/tests_pawpal.py -v
 ---
 
 ## Getting started
+
+## DEMO
+
+ <a href="screenshots/Screenshot 2026-04-06 at 12.32.31 AM.png" target="_blank"><img src='screenshots/Screenshot 2026-04-06 at 12.32.31 AM.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>. 
+
+
+ <a href="screenshots/Screenshot 2026-04-06 at 12.33.18 AM.png" target="_blank"><img src='screenshots/Screenshot 2026-04-06 at 12.33.18 AM.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>. 
 
 ### Setup
 
